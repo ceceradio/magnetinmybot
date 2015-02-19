@@ -1,5 +1,5 @@
 {
-  "name": "magnetinmybot,
+  "name": "magnetinmybot",
   "version": "0.0.1",
   "description": "A twitter robot that puts magnets in various places.",
   "main": "main.js",
