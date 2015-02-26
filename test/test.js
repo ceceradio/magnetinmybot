@@ -8,4 +8,15 @@ describe('MagnetFinder', function() {
             assert.deepEqual(typeof new MagnetFinder(), "object");
         });
     });
+    describe("#initializeDictionaries",function() {
+        it('Should fill the nouns and adjectives objects', function(done) {
+            this.timeout(20000);
+            var magnetFinder = new MagnetFinder();
+            magnetFinder.initializeDictionaries(function() {
+                assert.notDeepEqual(magnetFinder.nouns, {});
+                assert.notDeepEqual(magnetFinder.adjectives, {});
+                done();
+            });
+        });       
+    });
 });
