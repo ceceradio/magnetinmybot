@@ -67,7 +67,7 @@ var MagnetFinder = function () {
                 var potentialNouns2 = text.match(/in my (\w+) (\w+)/);
                 if (potentialNouns2 !== null) {
                     if (potentialNouns2[2] in this.adjectives) {
-                        var potentialNouns3 = text.match(/in my (\w+) (\w+)/);
+                        var potentialNouns3 = text.match(/in my (\w+) (\w+) (\w+)/);
                         if (potentialNouns3 !== null) {
                             if (potentialNouns3[3] in this.nouns && !((potentialNouns3[1]+" "+potentialNouns3[2]+" "+potentialNouns3[3]).toLowerCase() in this.usedLocations))
                                 return potentialNouns3[1]+" "+potentialNouns3[2]+" "+potentialNouns3[3];
