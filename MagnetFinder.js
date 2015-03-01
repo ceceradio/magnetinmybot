@@ -60,28 +60,44 @@ var MagnetFinder = function () {
         });
     }
     MagnetFinder.prototype.findWhereMyMagnetIs = function (text) {
-        // i can make this recursive but i don't want to think about it right now
-        var potentialNouns = text.match(/in my (\w+)/);
-        if (potentialNouns !== null) {
-            if (potentialNouns[1] in this.adjectives) {
-                var potentialNouns2 = text.match(/in my (\w+) (\w+)/);
-                if (potentialNouns2 !== null) {
-                    if (potentialNouns2[2] in this.adjectives) {
-                        var potentialNouns3 = text.match(/in my (\w+) (\w+) (\w+)/);
-                        if (potentialNouns3 !== null) {
-                            if (potentialNouns3[3] in this.nouns && !((potentialNouns3[1]+" "+potentialNouns3[2]+" "+potentialNouns3[3]).toLowerCase() in this.usedLocations))
-                                return potentialNouns3[1]+" "+potentialNouns3[2]+" "+potentialNouns3[3];
-                        }
-                    }
-                    if (potentialNouns2[2] in this.nouns && !((potentialNouns2[1]+" "+potentialNouns2[2]).toLowerCase() in this.usedLocations))
-                        return potentialNouns2[1]+" "+potentialNouns2[2];
+        var self = this;
+        function finder(numberOfWords) {
+            if (numberOfWords == 0)
+                return false;
+            var regexStr = '(?=in my';
+            for (var i = 0; i < numberOfWords; i++) {
+                regexStr += " (\\w+)";
+            }
+            regexStr += ").";
+            var regex = new RegExp(regexStr,"g");
+            var potentialWords;
+             
+            while ((potentialWords = regex.exec(text)) != null) {
+                if (potentialWords.index === regex.lastIndex) {
+                    regex.lastIndex++;
                 }
+                if (potentialWords == null)
+                    return finder(numberOfWords-1);
+                var matchesGrammar = true;
+                var constructedString = "";
+                // words start at 1
+                for (var i = 1; i <= numberOfWords; i++) {
+                    constructedString += potentialWords[i];
+                    if (i < numberOfWords)
+                        constructedString += " ";
+                    if ( (i < numberOfWords && !(potentialWords[i] in self.adjectives)) || (i == numberOfWords && !(potentialWords[i] in self.nouns))) {
+                        matchesGrammar = false;
+                        break;
+                    }
+                }
+                if (matchesGrammar)
+                    return constructedString;
             }
-            if (potentialNouns[1] in this.nouns && !(potentialNouns[1].toLowerCase() in this.usedLocations)) {
-                return potentialNouns[1];
-            }
+            
+            return finder(numberOfWords-1);
         }
-        return false;
+        return finder(4);
+        
     }
 
 if (typeof module !== "undefined") {
