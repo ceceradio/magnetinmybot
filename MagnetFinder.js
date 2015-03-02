@@ -90,7 +90,7 @@ var MagnetFinder = function () {
                         break;
                     }
                 }
-                if (matchesGrammar)
+                if (matchesGrammar && !(constructedString.toLowerCase() in self.usedLocations))
                     return constructedString;
             }
             

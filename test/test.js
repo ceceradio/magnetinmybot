@@ -33,8 +33,11 @@ describe('MagnetFinder', function() {
         });
         it('Should return longer sentences before shorter ones', function() {
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my cool smelly car"),"cool smelly car");
-            // this is failing right now, but shouldn't.
             assert.equal(magnetFinder.findWhereMyMagnetIs("yeah in my car in my cool nice car"),"cool nice car");
+        });
+        it('Should match two word nouns',function() {
+            // this is failing right now
+            assert.equal(magnetFinder.findWhereMyMagnetIs("in my bulletin board"),"bulletin board");
         });
     });
 });
