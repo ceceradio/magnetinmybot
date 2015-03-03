@@ -39,5 +39,9 @@ describe('MagnetFinder', function() {
             // this is failing right now
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my bulletin board"),"bulletin board");
         });
+        it('Should match possessive nouns and continue reading',function() {
+            // this is failing right now
+            assert.equal(magnetFinder.findWhereMyMagnetIs("in my school's bulletin board"),"school's bulletin board");
+        });
     });
 });
