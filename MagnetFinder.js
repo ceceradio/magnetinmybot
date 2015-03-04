@@ -1,8 +1,10 @@
 var fs = require('fs');
+var md5 = require('MD5');
 var MagnetFinder = function () {
     this.nouns = {};
     this.adjectives = {};
     this.usedLocations = {};
+    this.compoundNounHashes = {};
 }
     // dictionary provided by http://icon.shef.ac.uk/Moby/mpos.html
     MagnetFinder.prototype.loadDictionary = function(callback) {
@@ -21,6 +23,8 @@ var MagnetFinder = function () {
                     self.adjectives[parts[0]] = true;
                 if (parts[1].indexOf("N") > -1)
                     self.nouns[parts[0]] = true;
+                if (parts[1].indexOf("h") > -1)
+                    self.compoundNounHashes[md5(parts[0])] = true;
             }
             callback(false);
         });
@@ -59,45 +63,104 @@ var MagnetFinder = function () {
             callback(false);
         });
     }
+    MagnetFinder.prototype.findAdjective = function (phrase) {
+        var word = phrase.match(/^\s*([\w\-]+)/);
+        if (word == null)
+            return false;
+        word = word[1];
+        if (word in this.adjectives)
+            return word;
+        return false;
+    }
+    MagnetFinder.prototype.findNoun = function(phrase) {
+        var word = phrase.match(/^\s*([\w\-]+)/);
+        if (word == null)
+            return false;
+        word = word[1];
+        if (word in this.nouns)
+            return word;
+        return false;
+    }
+    MagnetFinder.prototype.findPossessiveNoun = function(phrase) {
+        var word = phrase.match(/^\s*([\w\-]+'s?)/);
+        if (word == null)
+            return false;
+        word = word[1];
+        var nounOnly = word.match(/([\w\-]+)/)[1];
+        if (nounOnly in this.nouns)
+            return word;
+        return false;
+    }
+    MagnetFinder.prototype.findCompoundNoun = function(phrase) {
+        var word = phrase.match(/^\s*([\w\-]+\s[\w\-]+)/);
+        if (word == null)
+            return false;
+        word = word[1];
+        if (md5(word) in this.compoundNounHashes)
+            return word;
+        return false;
+    }
+    MagnetFinder.prototype.findPossessiveCompoundNoun = function(phrase) {
+        var word = phrase.match(/^\s*([\w\-]+\s[\w\-]+'s?)/);
+        if (word == null)
+            return false;
+        word = word[1];
+        var nounOnly = phrase.match(/^\s*([\w\-]+\s[\w\-]+)/)[1];
+        if (md5(nounOnly) in this.compoundNounHashes)
+            return word;
+        return false;
+    }
+    MagnetFinder.prototype.spliceWordOutOfPhrase = function(word, phrase) {
+        return phrase.slice(phrase.indexOf(word)+word.length);
+    }
+    // SSF = string so far
+    MagnetFinder.prototype.parsePhrase = function(SSF, phrase) {
+        if (typeof phrase === "undefined" || phrase == "")
+            return SSF;
+        var word;
+        if ((word = this.findPossessiveCompoundNoun(phrase)) !== false) {
+            SSF = SSF + " " + word;
+            return this.parsePhrase(SSF, this.spliceWordOutOfPhrase(word, phrase));
+        }
+        if ((word = this.findPossessiveNoun(phrase)) !== false) {
+            SSF = SSF + " " + word;
+            return this.parsePhrase(SSF, this.spliceWordOutOfPhrase(word, phrase));
+        }
+        if ((word = this.findAdjective(phrase)) !== false) {
+            SSF = SSF + " " + word;
+            return this.parsePhrase(SSF, this.spliceWordOutOfPhrase(word, phrase));
+        }
+        if ((word = this.findCompoundNoun(phrase)) !== false) {
+            SSF = SSF + " " + word;
+            return SSF;
+        }
+        if ((word = this.findNoun(phrase)) !== false) {
+            SSF = SSF + " " + word;
+            return SSF;
+        }
+        return SSF;
+    }
     MagnetFinder.prototype.findWhereMyMagnetIs = function (text) {
         var self = this;
-        function finder(numberOfWords) {
-            if (numberOfWords == 0)
-                return false;
-            var regexStr = '(?=in my';
-            for (var i = 0; i < numberOfWords; i++) {
-                regexStr += " (\\w+)";
-            }
-            regexStr += ").";
-            var regex = new RegExp(regexStr,"g");
-            var potentialWords;
-             
-            while ((potentialWords = regex.exec(text)) != null) {
-                if (potentialWords.index === regex.lastIndex) {
-                    regex.lastIndex++;
-                }
-                if (potentialWords == null)
-                    return finder(numberOfWords-1);
-                var matchesGrammar = true;
-                var constructedString = "";
-                // words start at 1
-                for (var i = 1; i <= numberOfWords; i++) {
-                    constructedString += potentialWords[i];
-                    if (i < numberOfWords)
-                        constructedString += " ";
-                    if ( (i < numberOfWords && !(potentialWords[i] in self.adjectives)) || (i == numberOfWords && !(potentialWords[i] in self.nouns))) {
-                        matchesGrammar = false;
-                        break;
-                    }
-                }
-                if (matchesGrammar && !(constructedString.toLowerCase() in self.usedLocations))
-                    return constructedString;
-            }
-            
-            return finder(numberOfWords-1);
-        }
-        return finder(4);
+        var regexToFindWholeStrings = /(?=in my ([\w'\-]+(?:\s+[\w'\-]+)*))./g;
+        var trimEnd = /([\w+\s+\-']+)\s+in my\s*/;
+        var potentialPhrases;
         
+        var bestResult = "";
+        while ((potentialPhrases = regexToFindWholeStrings.exec(text)) != null) {
+            if (potentialPhrases.index === regexToFindWholeStrings.lastIndex) {
+                regexToFindWholeStrings.lastIndex++;
+            }
+            if (potentialPhrases[1].indexOf("in my") > -1)
+                potentialPhrases[1] = potentialPhrases[1].match(trimEnd)[1];
+            var result = self.parsePhrase("", potentialPhrases[1]);
+            if (result !== false && result.length > bestResult.length && !(result.toLowerCase().trim() in self.usedLocations)) {
+                bestResult = result.trim();
+            }
+        }
+        if (bestResult != "")
+            return bestResult.trim();
+        return false;
     }
 
 if (typeof module !== "undefined") {
