@@ -151,8 +151,11 @@ MagnetFinder.prototype.findWhereMyMagnetIs = function (text) {
         if (potentialPhrases.index === regexToFindWholeStrings.lastIndex) {
             regexToFindWholeStrings.lastIndex++;
         }
-        if (potentialPhrases[1].indexOf("in my") > -1)
-            potentialPhrases[1] = potentialPhrases[1].match(trimEnd)[1];
+        if (potentialPhrases[1].indexOf("in my") > -1) {
+            var trimResult = potentialPhrases[1].match(trimEnd);
+            if (trimResult != null)
+                potentialPhrases[1] = trimResult[1];
+        }
         var result = self.parsePhrase("", potentialPhrases[1]);
         if (result !== false && result.length > bestResult.length && !(result.toLowerCase().trim() in self.usedLocations)) {
             bestResult = result.trim();
