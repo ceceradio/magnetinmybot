@@ -74,7 +74,7 @@ function loadBadwordDictionary(callback) {
     });
 }
 function hasBadWords(text) {
-    var tokens = text.split(/\s+/);
+    var tokens = text.split(/\W+/);
     for (var i=0;i<tokens.length;i++) {
         if (tokens[i].toLowerCase() in badWords)
             return true;

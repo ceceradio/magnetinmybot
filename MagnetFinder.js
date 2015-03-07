@@ -1,5 +1,4 @@
 var fs = require('fs');
-var md5 = require('MD5');
 var MagnetFinder = function () {
     this.nouns = {};
     this.adjectives = {};
@@ -24,7 +23,7 @@ MagnetFinder.prototype.loadDictionary = function(callback) {
             if (parts[1].indexOf("N") > -1)
                 self.nouns[parts[0]] = true;
             if (parts[1].indexOf("h") > -1)
-                self.compoundNounHashes[md5(parts[0])] = true;
+                self.compoundNounHashes[parts[0]] = true;
         }
         callback(false);
     });
@@ -96,7 +95,7 @@ MagnetFinder.prototype.findCompoundNoun = function(phrase) {
     if (word == null)
         return false;
     word = word[1];
-    if (md5(word) in this.compoundNounHashes)
+    if (word in this.compoundNounHashes)
         return word;
     return false;
 }
@@ -106,7 +105,7 @@ MagnetFinder.prototype.findPossessiveCompoundNoun = function(phrase) {
         return false;
     word = word[1];
     var nounOnly = phrase.match(/^\s*([\w\-]+\s[\w\-]+)/)[1];
-    if (md5(nounOnly) in this.compoundNounHashes)
+    if (nounOnly in this.compoundNounHashes)
         return word;
     return false;
 }
@@ -116,7 +115,7 @@ MagnetFinder.prototype.spliceWordOutOfPhrase = function(word, phrase) {
 // SSF = string so far
 MagnetFinder.prototype.parsePhrase = function(SSF, phrase) {
     if (typeof phrase === "undefined" || phrase == "")
-        return SSF;
+        return "";
     var word;
     if ((word = this.findPossessiveCompoundNoun(phrase)) !== false) {
         SSF = SSF + " " + word;
@@ -138,7 +137,7 @@ MagnetFinder.prototype.parsePhrase = function(SSF, phrase) {
         SSF = SSF + " " + word;
         return SSF;
     }
-    return SSF;
+    return "";
 }
 MagnetFinder.prototype.findWhereMyMagnetIs = function (text) {
     var self = this;

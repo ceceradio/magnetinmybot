@@ -26,18 +26,19 @@ describe('MagnetFinder', function() {
             assert.equal(magnetFinder.findWhereMyMagnetIs("yeah in my car in my cool nice car"),"cool nice car");
         });
         it('Should match two word nouns',function() {
-            // this is failing right now
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my bulletin board"),"bulletin board");
         });
         it('Should trim extra "in my" phrases',function() {
-            // this is failing right now
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my school's bulletin board in my"),"school's bulletin board");
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my friend's dog's paw in my car"),"friend's dog's paw");
         });
         it('Should match possessive nouns and continue matching',function() {
-            // this is failing right now
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my school's bulletin board"),"school's bulletin board");
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my friend's dog's paw"),"friend's dog's paw");
+        });
+        it('Should not match trailing sentences',function() {
+            assert.equal(magnetFinder.findWhereMyMagnetIs("in my school's abactinal"),"");
+            assert.equal(magnetFinder.findWhereMyMagnetIs("in my dog'"),"");
         });
     });
 });
