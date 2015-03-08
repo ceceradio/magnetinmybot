@@ -41,4 +41,12 @@ describe('MagnetFinder', function() {
             assert.equal(magnetFinder.findWhereMyMagnetIs("in my dog'"),"");
         });
     });
+    describe("#hasBadWords",function() {
+        it('Should return false if any bad words are found',function() {
+            
+        });
+        it('Should find bad words that are obfuscated with non-word characters',function() {
+            
+        });
+    });
 });
