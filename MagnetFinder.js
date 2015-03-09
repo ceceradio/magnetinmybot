@@ -4,6 +4,7 @@ var MagnetFinder = function () {
     this.adjectives = {};
     this.usedLocations = {};
     this.compoundNounHashes = {};
+    this.badWords = {};
 }
 // dictionary provided by http://icon.shef.ac.uk/Moby/mpos.html
 MagnetFinder.prototype.loadDictionary = function(callback) {
@@ -28,16 +29,20 @@ MagnetFinder.prototype.loadDictionary = function(callback) {
         callback(false);
     });
 }
-MagnetFinder.prototype.initializeDictionaries = function(callback) {
+MagnetFinder.prototype.loadBadwordDictionary = function(callback) {
     var self = this;
-    this.loadUsedLocations(function(err) {
-        self.loadDictionary(function(err) {
-            if (err) { callback(err); return; }
-            callback(false);
-        });
+    fs.readFile("stopwords.txt", 'utf-8', function(err,data) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        var stopwordsArray = data.split(/\s+/);
+        for (var i=0;i<stopwordsArray.length;i++) {
+            self.badWords[stopwordsArray[i]] = true;
+        }
+        callback(false);
     });
 }
-
 MagnetFinder.prototype.loadUsedLocations = function (callback) {
     var self = this;
     fs.readFile("saveData.json", 'utf-8', function(err,data) {
@@ -48,6 +53,26 @@ MagnetFinder.prototype.loadUsedLocations = function (callback) {
         self.usedLocations = JSON.parse(data);
         callback(false);
     });
+}
+MagnetFinder.prototype.initializeDictionaries = function(callback) {
+    var self = this;
+    this.loadUsedLocations(function(err) {
+        self.loadDictionary(function(err) {
+            self.loadBadwordDictionary(function(err) {
+                if (err) { callback(err); return; }
+                callback(false);
+            });
+        });
+    });
+}
+MagnetFinder.prototype.hasBadWords = function(text) {
+    var tokens = text.replace(/[\W\s]/g,"");
+    for (var index in this.badWords) {
+       if (tokens.indexOf(index) > -1) {
+            return true;
+       }       
+    }
+    return false;
 }
 MagnetFinder.prototype.addUsedLocation = function(location) {
     this.usedLocations[location] = true;

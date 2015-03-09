@@ -6,15 +6,13 @@ var fs = require('fs');
 var twit = new twitter(config.twitter);
 
 
-var badWords = {};
+
 var tweetInterval = 2 * 60 * 1000;
 
-loadBadwordDictionary(function(err) {
-    magnetFinder.initializeDictionaries(function(err) {
-        if (err) return;
-        setInterval(function() {doTweet();}, tweetInterval);
-        doTweet();
-    });
+magnetFinder.initializeDictionaries(function(err) {
+    if (err) return;
+    setInterval(function() {doTweet();}, tweetInterval);
+    doTweet();
 });
 
 function doTweet() {
@@ -53,32 +51,12 @@ function pickAMagnetLocation(callback) {
         var magnetLocations = [];
         for (var i in texts) {
             var magnetLocation = magnetFinder.findWhereMyMagnetIs(texts[i]);
-            if (magnetLocation !== false && !hasBadWords(magnetLocation)) {
+            if (magnetLocation !== false && !magnetFinder.hasBadWords(magnetLocation)) {
                 magnetLocations.push(magnetLocation);
             }
         }
         callback(false, magnetLocations[Math.floor(magnetLocations.length * Math.random())]);
     });
 }
-function loadBadwordDictionary(callback) {
-    fs.readFile("stopwords.txt", 'utf-8', function(err,data) {
-        if (err) {
-            callback(err);
-            return;
-        }
-        var stopwordsArray = data.split(/\s+/);
-        for (var i=0;i<stopwordsArray.length;i++) {
-            badWords[stopwordsArray[i]] = true;
-        }
-        callback(false);
-    });
-}
-function hasBadWords(text) {
-    var tokens = text.split(/\W+/);
-    for (var i=0;i<tokens.length;i++) {
-        if (tokens[i].toLowerCase() in badWords)
-            return true;
-    }
-    return false;
-}
+
 
