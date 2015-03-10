@@ -42,12 +42,14 @@ describe('MagnetFinder', function() {
         });
     });
     describe("#hasBadWords",function() {
-        it('Should return false if any bad words are found',function() {
+        before(function() {
             magnetFinder.badWords["booty"] = true;
+            assert.equal("booty" in magnetFinder.badWords, true);
+        });
+        it('Should return false if any bad words are found',function() {
             assert.equal(magnetFinder.hasBadWords("that's the booty huh?"),true);            
         });
         it('Should find bad words that are obfuscated with non-word characters',function() {
-            magnetFinder.badWords["booty"] = true;
             assert.equal(magnetFinder.hasBadWords("that's the boo'ty, huh?"),true);
         });
     });
