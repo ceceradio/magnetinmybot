@@ -3,7 +3,7 @@ var MagnetFinder = function () {
     this.nouns = {};
     this.adjectives = {};
     this.usedLocations = {};
-    this.compoundNounHashes = {};
+    this.compoundNouns = {};
     this.badWords = {};
 }
 // dictionary provided by http://icon.shef.ac.uk/Moby/mpos.html
@@ -24,7 +24,7 @@ MagnetFinder.prototype.loadDictionary = function(callback) {
             if (parts[1].indexOf("N") > -1)
                 self.nouns[parts[0]] = true;
             if (parts[1].indexOf("h") > -1)
-                self.compoundNounHashes[parts[0]] = true;
+                self.compoundNouns[parts[0]] = true;
         }
         callback(false);
     });
@@ -120,7 +120,7 @@ MagnetFinder.prototype.findCompoundNoun = function(phrase) {
     if (word == null)
         return false;
     word = word[1];
-    if (word in this.compoundNounHashes)
+    if (word in this.compoundNouns)
         return word;
     return false;
 }
@@ -130,7 +130,7 @@ MagnetFinder.prototype.findPossessiveCompoundNoun = function(phrase) {
         return false;
     word = word[1];
     var nounOnly = phrase.match(/^\s*([\w\-]+\s[\w\-]+)/)[1];
-    if (nounOnly in this.compoundNounHashes)
+    if (nounOnly in this.compoundNouns)
         return word;
     return false;
 }
