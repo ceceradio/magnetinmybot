@@ -15,6 +15,12 @@ describe('MagnetFinder', function() {
             done();
         });
     });
+    describe("#addUsedLocation", function() {
+        it('should add the given phrase to the used locations dictionary',function() {
+            magnetFinder.addUsedLocation("testlocationhello");
+            assert.equal("testlocationhello" in magnetFinder.usedLocations,true);
+        });
+    });
     describe("#spliceWordOutOfPhrase",function() { 
         it('Should return the remainder phrase beyond the given word',function() {
             assert.equal(magnetFinder.spliceWordOutOfPhrase("in my","in my car")," car");
