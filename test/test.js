@@ -15,6 +15,11 @@ describe('MagnetFinder', function() {
             done();
         });
     });
+    describe("#spliceWordOutOfPhrase(word, phrase)", function() {
+        it('should remove the word and everything before it from the given phrase', function() {
+            assert.equal(magnetFinder.spliceWordOutOfPhrase("abc", "the abc song")," song");
+        });
+    });
     describe("#addUsedLocation", function() {
         it('should add the given phrase to the used locations dictionary',function() {
             magnetFinder.addUsedLocation("testlocationhello");
