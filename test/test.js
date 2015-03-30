@@ -18,6 +18,7 @@ describe('MagnetFinder', function() {
     describe("#spliceWordOutOfPhrase(word, phrase)", function() {
         it('should remove the word and everything before it from the given phrase', function() {
             assert.equal(magnetFinder.spliceWordOutOfPhrase("abc", "the abc song")," song");
+            assert.equal(magnetFinder.spliceWordOutOfPhrase("abc", "the song abc"),"");
         });
     });
     describe("#addUsedLocation", function() {
